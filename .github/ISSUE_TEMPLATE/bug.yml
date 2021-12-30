@@ -63,19 +63,10 @@ body:
   - type: textarea
     attributes:
       label: Version
-      description: Please provide FTPGrab, operating system version and system infirmation.
+      description: Please provide MacOSX SDK, operating system version and system information.
       value: |
-        * Docker compose version (type `docker-compose --version`):
+        * MacOSX SDK version:
         * System info (type `uname -a`):
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Docker compose
-      description: Please provide your compose config if applicable.
-      placeholder: Output of `docker-compose config` command
-      render: yaml
     validations:
       required: true
 
