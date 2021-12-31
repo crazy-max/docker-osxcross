@@ -5,10 +5,11 @@ ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/
 ARG OSX_CROSS_COMMIT="d904031e7e3faa8a23c21b319a65cc915dac51b3"
 
 FROM --platform=$BUILDPLATFORM alpine AS sdk
-RUN apk --update --no-cache add ca-certificates curl
+RUN apk --update --no-cache add ca-certificates curl tar xz
 ARG OSX_SDK
 ARG OSX_SDK_URL
 RUN curl -sSL "$OSX_SDK_URL" -o "/$OSX_SDK.tar.xz"
+RUN mkdir /osxsdk && tar -xf "/$OSX_SDK.tar.xz" -C "/osxsdk"
 
 FROM --platform=$BUILDPLATFORM alpine AS osxcross-src
 RUN apk --update --no-cache add git patch
@@ -52,14 +53,16 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-FROM base as build
+FROM base as build-linux
 ARG OSX_SDK
 WORKDIR /tmp/osxcross
 COPY --from=osxcross-src /osxcross .
 COPY --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
-RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/osxcross ./build.sh
-RUN mkdir /osxsdk && tar -xf ./tarballs/$OSX_SDK.tar.xz -C /osxsdk
+RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
 
+FROM scratch as build-darwin
+COPY --from=sdk /osxsdk /out/osxsdk
+
+FROM build-${TARGETOS} AS build
 FROM scratch
-COPY --from=build /osxcross /osxcross
-COPY --from=build /osxsdk /osxsdk
+COPY --from=build /out /

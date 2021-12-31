@@ -32,6 +32,10 @@ ___
 * [Contributing](#contributing)
 * [License](#license)
 
+## Projects using osxcross
+
+* [goxx](https://github.com/crazy-max/goxx)
+
 ## Build locally
 
 ```shell
@@ -57,6 +61,8 @@ $ docker run --rm mplatform/mquery crazymax/osxcross:latest
 Image: crazymax/osxcross:latest
  * Manifest List: Yes
  * Supported platforms:
+   - darwin/amd64
+   - darwin/arm64
    - linux/amd64
    - linux/arm64
 ```
@@ -68,6 +74,23 @@ FROM debian
 COPY --from=crazymax/osxcross:latest /osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
+RUN ...
+```
+
+`darwin/amd64` and `darwin/arm64` platforms are also available with the
+MacOSX SDK in `/osxsdk` if you want to use it as sysroot with your own toolchain
+like [`tonistiigi/xx`](https://github.com/tonistiigi/xx):
+
+```dockerfile
+# syntax=docker/dockerfile:1.3
+
+FROM --platform=$BUILDPLATFORM alpine
+COPY --from=tonistiigi/xx / /
+RUN apk add --no-cache clang lld
+ARG TARGETPLATFORM
+RUN --mount=type=bind,target=. \
+  --mount=from=crazymax/osxcross:latest,src=/osxsdk,target=/xx-sdk \
+  xx-clang ...
 ```
 
 ## Contributing
