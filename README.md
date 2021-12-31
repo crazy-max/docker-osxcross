@@ -1,15 +1,14 @@
-[![Latest version](https://img.shields.io/github/v/tag/crazy-max/docker-osxsdk?label=version&style=flat-square)](https://hub.docker.com/r/crazymax/osxsdk/tags?page=1&ordering=last_updated)
-[![Build Status](https://img.shields.io/github/workflow/status/crazy-max/docker-osxsdk/build?label=build&logo=github&style=flat-square)](https://github.com/crazy-max/docker-osxsdk/actions?query=workflow%3Abuild)
-[![Docker Stars](https://img.shields.io/docker/stars/crazymax/osxsdk.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxsdk/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/crazymax/osxsdk.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxsdk/)
+[![Latest version](https://img.shields.io/github/v/tag/crazy-max/docker-osxcross?label=version&style=flat-square)](https://hub.docker.com/r/crazymax/osxcross/tags?page=1&ordering=last_updated)
+[![Build Status](https://img.shields.io/github/workflow/status/crazy-max/docker-osxcross/build?label=build&logo=github&style=flat-square)](https://github.com/crazy-max/docker-osxcross/actions?query=workflow%3Abuild)
+[![Docker Stars](https://img.shields.io/docker/stars/crazymax/osxcross.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxcross/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/crazymax/osxcross.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxcross/)
 
 [![Become a sponsor](https://img.shields.io/badge/sponsor-crazy--max-181717.svg?logo=github&style=flat-square)](https://github.com/sponsors/crazy-max)
 [![Donate Paypal](https://img.shields.io/badge/donate-paypal-00457c.svg?logo=paypal&style=flat-square)](https://www.paypal.me/crazyws)
 
 ## About
 
-MacOSX SDK as scratch Docker image.
-
+MacOSX cross toolchain.<br />
 If you are interested, [check out](https://hub.docker.com/r/crazymax/) my other Docker images!
 
 💡 Want to be notified of new releases? Check out 🔔 [Diun (Docker Image Update Notifier)](https://github.com/crazy-max/diun) project!
@@ -36,8 +35,8 @@ ___
 ## Build locally
 
 ```shell
-git clone https://github.com/crazy-max/docker-osxsdk.git
-cd docker-osxsdk
+git clone https://github.com/crazy-max/docker-osxcross.git
+cd docker-osxcross
 
 # Build image and output to docker (default)
 docker buildx bake
@@ -48,14 +47,14 @@ docker buildx bake image-all
 
 ## Image
 
-| Registry                                                                                           | Image                           |
-|----------------------------------------------------------------------------------------------------|---------------------------------|
-| [Docker Hub](https://hub.docker.com/r/crazymax/osxsdk/)                                            | `crazymax/osxsdk`               |
-| [GitHub Container Registry](https://github.com/users/crazy-max/packages/container/package/osxsdk)  | `ghcr.io/crazy-max/osxsdk`      |
+| Registry                                                                                             | Image                           |
+|------------------------------------------------------------------------------------------------------|---------------------------------|
+| [Docker Hub](https://hub.docker.com/r/crazymax/osxcross/)                                            | `crazymax/osxcross`             |
+| [GitHub Container Registry](https://github.com/users/crazy-max/packages/container/package/osxcross)  | `ghcr.io/crazy-max/osxcross`    |
 
 ```
-$ docker run --rm mplatform/mquery crazymax/osxsdk:latest
-Image: crazymax/osxsdk:latest
+$ docker run --rm mplatform/mquery crazymax/osxcross:latest
+Image: crazymax/osxcross:latest
  * Manifest List: Yes
  * Supported platforms:
    - linux/amd64
@@ -66,9 +65,9 @@ Image: crazymax/osxsdk:latest
 
 ```dockerfile
 FROM debian
-COPY --from=crazymax/osxsdk:latest /osxsdk /osxsdk
-ENV PATH="/osxsdk/bin:$PATH"
-ENV LD_LIBRARY_PATH="/osxsdk/lib:$LD_LIBRARY_PATH"
+COPY --from=crazymax/osxcross:latest /osxcross /osxcross
+ENV PATH="/osxcross/bin:$PATH"
+ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
 ```
 
 ## Contributing

@@ -1,5 +1,5 @@
 variable "DEFAULT_TAG" {
-  default = "osxsdk:local"
+  default = "osxcross:local"
 }
 
 // Special target: https://github.com/docker/metadata-action#bake-definition

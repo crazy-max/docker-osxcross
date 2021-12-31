@@ -8,7 +8,7 @@ body:
       label: Support guidelines
       description: Please read the support guidelines before proceeding.
       options:
-        - label: I've read the [support guidelines](https://github.com/crazy-max/docker-osxsdk/blob/master/.github/SUPPORT.md)
+        - label: I've read the [support guidelines](https://github.com/crazy-max/docker-osxcross/blob/master/.github/SUPPORT.md)
           required: true
 
   - type: checkboxes
