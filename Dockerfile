@@ -2,7 +2,7 @@
 
 ARG OSX_SDK="MacOSX11.3.sdk"
 ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="aee7305d8bf66e494248f374efc9fdbed989c11a"
+ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
 
 FROM --platform=$BUILDPLATFORM alpine AS sdk
 RUN apk --update --no-cache add ca-certificates curl tar xz
@@ -15,7 +15,7 @@ FROM --platform=$BUILDPLATFORM alpine AS osxcross-src
 RUN apk --update --no-cache add git patch
 WORKDIR /osxcross
 ARG OSX_CROSS_COMMIT
-RUN git clone https://github.com/crazy-max/osxcross.git . && git reset --hard $OSX_CROSS_COMMIT
+RUN git clone https://github.com/tpoechtrager/osxcross.git . && git reset --hard $OSX_CROSS_COMMIT
 COPY patches/lcxx.patch .
 RUN patch -p1 < lcxx.patch
 
