@@ -74,7 +74,7 @@ FROM debian
 COPY --from=crazymax/osxcross:latest /osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN ...
+RUN o64-clang ...
 ```
 
 `darwin/amd64` and `darwin/arm64` platforms are also available with the
