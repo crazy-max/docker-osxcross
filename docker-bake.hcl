@@ -33,7 +33,6 @@ target "image-all" {
     "linux/arm64",
     "linux/arm/v5",
     "linux/arm/v6",
-    "linux/arm/v7",
     "linux/mips",
     "linux/mips64",
     "linux/mips64le",
@@ -44,7 +43,6 @@ target "image-all" {
     "windows/386",
     "windows/amd64",
     "windows/arm",
-    "windows/arm/v7",
     "windows/arm64"
   ]
 }
