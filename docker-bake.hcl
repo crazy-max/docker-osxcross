@@ -26,7 +26,25 @@ target "image-all" {
   platforms = [
     "darwin/amd64",
     "darwin/arm64",
+    "freebsd/amd64",
+    "linux/386",
     "linux/amd64",
-    "linux/arm64"
+    "linux/arm",
+    "linux/arm64",
+    "linux/arm/v5",
+    "linux/arm/v6",
+    "linux/arm/v7",
+    "linux/mips",
+    "linux/mips64",
+    "linux/mips64le",
+    "linux/mipsle",
+    "linux/ppc64le",
+    "linux/riscv64",
+    "linux/s390x",
+    "windows/386",
+    "windows/amd64",
+    "windows/arm",
+    "windows/arm/v7",
+    "windows/arm64"
   ]
 }

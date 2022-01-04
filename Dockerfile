@@ -53,16 +53,37 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-FROM base as build-linux
+FROM base as build-osxcross
 ARG OSX_SDK
 WORKDIR /tmp/osxcross
 COPY --from=osxcross-src /osxcross .
 COPY --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
 
-FROM scratch as build-darwin
+FROM --platform=$BUILDPLATFORM busybox as build-dummy
+RUN mkdir -p /out/osxcross
+
+FROM build-dummy as build-darwin
 COPY --from=sdk /osxsdk /out/osxsdk
 
+FROM build-dummy as build-windows
+FROM build-dummy as build-freebsd
+FROM build-dummy as build-linux-386
+FROM build-osxcross as build-linux-amd64
+FROM build-dummy as build-linux-arm
+FROM build-osxcross as build-linux-arm64
+FROM build-dummy as build-linux-armv5
+FROM build-dummy as build-linux-armv6
+FROM build-dummy as build-linux-armv7
+FROM build-dummy as build-linux-mips
+FROM build-dummy as build-linux-mips64
+FROM build-dummy as build-linux-mips64le
+FROM build-dummy as build-linux-mipsle
+FROM build-dummy as build-linux-ppc64le
+FROM build-dummy as build-linux-riscv64
+FROM build-dummy as build-linux-s390x
+FROM build-linux-${TARGETARCH}${TARGETVARIANT} AS build-linux
 FROM build-${TARGETOS} AS build
+
 FROM scratch
 COPY --from=build /out /
