@@ -1,5 +1,6 @@
-# syntax=docker/dockerfile:1.3
+# syntax=docker/dockerfile:1
 
+ARG UBUNTU_VERSION="20.04"
 ARG OSX_SDK="MacOSX11.3.sdk"
 ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
@@ -19,19 +20,15 @@ RUN git clone https://github.com/tpoechtrager/osxcross.git . && git reset --hard
 COPY patches/lcxx.patch .
 RUN patch -p1 < lcxx.patch
 
-FROM ubuntu:21.04 AS base
+FROM ubuntu:${UBUNTU_VERSION} AS base
 RUN export DEBIAN_FRONTEND="noninteractive" \
   && apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \
-    binutils-multiarch \
     binutils-multiarch-dev \
-    build-essential \
     ca-certificates \
     clang \
     cmake \
-    gcc \
-    g++ \
     git \
     llvm \
     llvm-dev \
@@ -45,6 +42,8 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     libxml2-dev \
     libz-dev \
     lzma-dev \
+    make \
+    patch \
     python \
     uuid-dev \
     xz-utils \
