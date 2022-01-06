@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG UBUNTU_VERSION="18.04"
+ARG CMAKE_VERSION="3.20.1"
 ARG OSX_SDK="MacOSX11.3.sdk"
 ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
@@ -20,18 +21,22 @@ RUN git clone https://github.com/tpoechtrager/osxcross.git . && git reset --hard
 COPY patches/lcxx.patch .
 RUN patch -p1 < lcxx.patch
 
+FROM alpine AS cmake
+RUN apk --update --no-cache add ca-certificates wget tar
+WORKDIR /out
+ARG CMAKE_VERSION
+RUN wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-$(uname -m).tar.gz -O - | tar xvz --strip 1
+
 FROM ubuntu:${UBUNTU_VERSION} AS base
 RUN export DEBIAN_FRONTEND="noninteractive" \
   && apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \
     binutils-multiarch-dev \
+    build-essential \
     ca-certificates \
     clang \
-    cmake \
     git \
-    llvm \
-    llvm-dev \
     libbz2-dev \
     libmpc-dev \
     libmpfr-dev \
@@ -58,6 +63,8 @@ WORKDIR /tmp/osxcross
 COPY --from=osxcross-src /osxcross .
 COPY --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN mkdir -p /out/osxsdk
+COPY --from=cmake /out /opt/cmake
+ENV PATH=/opt/cmake/bin:$PATH
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy
