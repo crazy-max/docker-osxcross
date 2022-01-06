@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG UBUNTU_VERSION="20.04"
+ARG UBUNTU_VERSION="18.04"
 ARG OSX_SDK="MacOSX11.3.sdk"
 ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
