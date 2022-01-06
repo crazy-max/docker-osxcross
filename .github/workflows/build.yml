@@ -41,6 +41,7 @@ jobs:
             ${{ env.GHCR_SLUG }}
           tags: |
             type=match,pattern=(.*)-r,group=1
+            type=ref,event=tag
             type=ref,event=pr
             type=edge
           labels: |
