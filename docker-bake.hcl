@@ -1,3 +1,6 @@
+variable "BASE_VARIANT" {
+  default = "ubuntu"
+}
 variable "DEFAULT_TAG" {
   default = "osxcross:local"
 }
@@ -14,6 +17,9 @@ group "default" {
 
 target "image" {
   inherits = ["docker-metadata-action"]
+  args = {
+    BASE_VARIANT = BASE_VARIANT
+  }
 }
 
 target "image-local" {
@@ -45,4 +51,12 @@ target "image-all" {
     "windows/arm",
     "windows/arm64"
   ]
+}
+
+target "test" {
+  target = "test"
+  args = {
+    BASE_VARIANT = BASE_VARIANT
+  }
+  output = ["type=cacheonly"]
 }
