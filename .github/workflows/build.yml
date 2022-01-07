@@ -19,6 +19,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - ubuntu
+          - alpine
     steps:
       -
         name: Checkout
@@ -28,9 +34,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.osxcross-cache
-          key: ${{ runner.os }}-osxcross-${{ github.sha }}
+          key: ${{ runner.os }}-osxcross-${{ matrix.variant }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-osxcross-
+            ${{ runner.os }}-osxcross-${{ matrix.variant }}-
       -
         name: Docker meta
         id: meta
@@ -40,12 +46,19 @@ jobs:
             ${{ env.DOCKERHUB_SLUG }}
             ${{ env.GHCR_SLUG }}
           tags: |
-            type=match,pattern=(.*)-r,group=1
-            type=ref,event=tag
+            type=match,pattern=(.*)-r,group=1,enable=${{ matrix.variant == 'ubuntu' }}
+            type=match,pattern=(.*)-r,group=1,suffix=${{ matrix.variant }}
+            type=edge,enable=${{ matrix.variant == 'ubuntu' }}
+            type=edge,suffix=${{ matrix.variant }}
+            type=ref,event=tag,enable=${{ matrix.variant == 'ubuntu' }}
+            type=ref,event=tag,suffix=${{ matrix.variant }}
             type=ref,event=pr
-            type=edge
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && matrix.variant == 'ubuntu' }}
+            type=raw,value=latest,suffix=${{ matrix.variant }},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+          flavor: |
+            latest=false
           labels: |
-            org.opencontainers.image.title=MacOSX cross toolchain
+            org.opencontainers.image.title=MacOSX cross toolchain (${{ matrix.variant }})
             org.opencontainers.image.vendor=CrazyMax
       -
         name: Set up QEMU
@@ -71,7 +84,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Build
+        name: Build ${{ matrix.variant }}
         uses: docker/bake-action@v1
         with:
           files: |
@@ -82,6 +95,8 @@ jobs:
             *.cache-from=type=local,src=/tmp/.osxcross-cache
             *.cache-to=type=local,dest=/tmp/.osxcross-cache-new,mode=max
           push: ${{ github.event_name != 'pull_request' }}
+        env:
+          BASE_VARIANT: ${{ matrix.variant }}
       -
         # FIXME: https://github.com/moby/buildkit/issues/1896
         name: Move cache

@@ -26,8 +26,9 @@ terms before using it.](https://www.apple.com/legal/sla/docs/xcode.pdf)**
 
 ___
 
-* [Build locally](#build-locally)
+* [Build](#build)
 * [Image](#image)
+  * [Supported tags](#supported-tags)
 * [Usage](#usage)
 * [Contributing](#contributing)
 * [License](#license)
@@ -36,7 +37,7 @@ ___
 
 * [goxx](https://github.com/crazy-max/goxx)
 
-## Build locally
+## Build
 
 ```shell
 git clone https://github.com/crazy-max/docker-osxcross.git
@@ -67,11 +68,35 @@ Image: crazymax/osxcross:latest
    - linux/arm64
 ```
 
+### Supported tags
+
+`alpine` and `ubuntu` variants are available for this image with `ubuntu` the
+default one.
+
+* `edge`, `edge-ubuntu`
+* `edge-alpine`
+* `latest`, `latest-ubuntu`, `xx.x`, `xx.x-ubuntu`
+* `latest-alpine`, `xx.x-alpine`
+
+> `xx.x` has to be replaced with one of the MaxOSX releases available (e.g. `11.3`).
+
 ## Usage
 
 ```dockerfile
-FROM debian
+FROM ubuntu
+RUN apt-get update && apt-get install -y clang lld libc6-dev
 COPY --from=crazymax/osxcross:latest /osxcross /osxcross
+ENV PATH="/osxcross/bin:$PATH"
+ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
+RUN o64-clang ...
+```
+
+With alpine:
+
+```dockerfile
+FROM alpine
+RUN apk add --no-cache clang lld musl-dev
+COPY --from=crazymax/osxcross:latest-alpine /osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
 RUN o64-clang ...
@@ -86,10 +111,10 @@ like [`tonistiigi/xx`](https://github.com/tonistiigi/xx):
 
 FROM --platform=$BUILDPLATFORM alpine
 COPY --from=tonistiigi/xx / /
-RUN apk add --no-cache clang lld
+RUN apk add --no-cache clang lld musl-dev
 ARG TARGETPLATFORM
 RUN --mount=type=bind,target=. \
-  --mount=from=crazymax/osxcross:latest,src=/osxsdk,target=/xx-sdk \
+  --mount=from=crazymax/osxcross:latest-alpine,src=/osxsdk,target=/xx-sdk \
   xx-clang ...
 ```
 
