@@ -83,23 +83,33 @@ default one.
 ## Usage
 
 ```dockerfile
+# syntax=docker/dockerfile:1
+
+ARG OSXCROSS_VERSION=latest
+FROM --platform=$BUILDPLATFORM crazymax/osxcross:${OSXCROSS_VERSION}-ubuntu AS osxcross
+
 FROM ubuntu
 RUN apt-get update && apt-get install -y clang lld libc6-dev
-COPY --from=crazymax/osxcross:latest /osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN o64-clang ...
+RUN --mount=from=osxcross,src=/osxcross,target=/osxcross \
+      o64-clang ...
 ```
 
 With alpine:
 
 ```dockerfile
+# syntax=docker/dockerfile:1
+
+ARG OSXCROSS_VERSION=latest
+FROM --platform=$BUILDPLATFORM crazymax/osxcross:${OSXCROSS_VERSION}-alpine AS osxcross
+
 FROM alpine
 RUN apk add --no-cache clang lld musl-dev
-COPY --from=crazymax/osxcross:latest-alpine /osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN o64-clang ...
+RUN --mount=from=osxcross,src=/osxcross,target=/osxcross \
+      o64-clang ...
 ```
 
 `darwin/amd64` and `darwin/arm64` platforms are also available with the
@@ -107,15 +117,18 @@ MacOSX SDK in `/osxsdk` if you want to use it as sysroot with your own toolchain
 like [`tonistiigi/xx`](https://github.com/tonistiigi/xx):
 
 ```dockerfile
-# syntax=docker/dockerfile:1.3
+# syntax=docker/dockerfile:1
+
+ARG OSXCROSS_VERSION=latest
+FROM crazymax/osxcross:${OSXCROSS_VERSION}-alpine AS osxcross
 
 FROM --platform=$BUILDPLATFORM alpine
 COPY --from=tonistiigi/xx / /
 RUN apk add --no-cache clang lld musl-dev
 ARG TARGETPLATFORM
 RUN --mount=type=bind,target=. \
-  --mount=from=crazymax/osxcross:latest-alpine,src=/osxsdk,target=/xx-sdk \
-  xx-clang ...
+    --mount=from=osxcross,src=/osxsdk,target=/xx-sdk \
+      xx-clang ...
 ```
 
 ## Contributing
