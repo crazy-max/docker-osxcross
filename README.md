@@ -70,15 +70,20 @@ Image: crazymax/osxcross:latest
 
 ### Supported tags
 
-`alpine` and `ubuntu` variants are available for this image with `ubuntu` the
-default one.
+`alpine`, `debian` and `ubuntu` variants are available for this image with
+`ubuntu` being the default one.
 
 * `edge`, `edge-ubuntu`
+* `edge-debian`
 * `edge-alpine`
-* `latest`, `latest-ubuntu`, `xx.x`, `xx.x-ubuntu`
-* `latest-alpine`, `xx.x-alpine`
+* `latest`, `latest-ubuntu`, `xx.x`, `xx.x-rx`, `xx.x-ubuntu`, `xx.x-rx-ubuntu`
+* `latest-debian`, `xx.x-debian`, `xx.x-rx-debian`
+* `latest-alpine`, `xx.x-alpine`, `xx.x-rx-alpine`
 
+> **Note:**
+> 
 > `xx.x` has to be replaced with one of the MaxOSX releases available (e.g. `11.3`).
+> `rx` has to be replaced with a release number (e.g. `r6`).
 
 ## Usage
 
@@ -121,11 +126,13 @@ like [`tonistiigi/xx`](https://github.com/tonistiigi/xx):
 
 ARG OSXCROSS_VERSION=latest
 FROM crazymax/osxcross:${OSXCROSS_VERSION}-alpine AS osxcross
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.2 AS xx
 
 FROM --platform=$BUILDPLATFORM alpine
-COPY --from=tonistiigi/xx / /
+COPY --from=xx / /
 RUN apk add --no-cache clang lld musl-dev
 ARG TARGETPLATFORM
+RUN xx-apk add gcc g++ musl-dev
 RUN --mount=type=bind,target=. \
     --mount=from=osxcross,src=/osxsdk,target=/xx-sdk \
       xx-clang ...

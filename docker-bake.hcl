@@ -53,10 +53,25 @@ target "image-all" {
   ]
 }
 
-target "test" {
-  target = "test"
+group "test" {
+  targets = ["test-osxcross", "test-osxsdk"]
+}
+
+target "test-osxcross" {
+  target = "test-osxcross"
   args = {
     BASE_VARIANT = BASE_VARIANT
   }
   output = ["type=cacheonly"]
+}
+
+target "test-osxsdk" {
+  target = "test-osxsdk"
+  output = ["type=cacheonly"]
+  platforms = [
+    "darwin/amd64",
+    "darwin/arm64",
+    "linux/amd64",
+    "linux/arm64",
+  ]
 }

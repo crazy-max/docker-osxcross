@@ -30,6 +30,7 @@ jobs:
       matrix:
         variant:
           - ubuntu
+          - debian
           - alpine
     steps:
       -
@@ -64,8 +65,6 @@ jobs:
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        with:
-          buildkitd-flags: --debug
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'
