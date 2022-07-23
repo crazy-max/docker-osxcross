@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  schedule:
+    - cron: '0 8 */6 * *' # every 6 days to keep cache
   push:
     branches:
       - 'main'
@@ -33,14 +35,6 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
-      -
-        name: Cache
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.osxcross-cache
-          key: ${{ runner.os }}-osxcross-${{ matrix.variant }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-osxcross-${{ matrix.variant }}-
       -
         name: Docker meta
         id: meta
@@ -96,14 +90,8 @@ jobs:
             ${{ steps.meta.outputs.bake-file }}
           targets: image-all
           set: |
-            *.cache-from=type=local,src=/tmp/.osxcross-cache
-            *.cache-to=type=local,dest=/tmp/.osxcross-cache-new,mode=max
+            *.cache-from=type=gha,scope=${{ matrix.variant }}
+            *.cache-to=type=gha,scope=${{ matrix.variant }},mode=max
           push: ${{ github.event_name != 'pull_request' }}
         env:
           BASE_VARIANT: ${{ matrix.variant }}
-      -
-        # FIXME: https://github.com/moby/buildkit/issues/1896
-        name: Move cache
-        run: |
-          rm -rf /tmp/.osxcross-cache
-          mv /tmp/.osxcross-cache-new /tmp/.osxcross-cache
