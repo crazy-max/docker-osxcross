@@ -91,6 +91,7 @@ RUN mkdir -p /out/osxcross /out/osxsdk
 
 FROM build-dummy AS build-darwin
 COPY --from=sdk /osxsdk /out/osxsdk
+RUN mkdir -p /out/osxcross
 
 FROM build-dummy AS build-windows
 FROM build-dummy AS build-freebsd
