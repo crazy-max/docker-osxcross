@@ -20,9 +20,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        type:
+          - osxcross
         variant:
           - ubuntu
+          - debian
           - alpine
+        include:
+          - type: osxsdk
+            variant: alpine
     steps:
       -
         name: Checkout
@@ -34,7 +40,7 @@ jobs:
         name: Test
         uses: docker/bake-action@v2
         with:
-          targets: test
+          targets: test-${{ matrix.type }}
           set: |
             *.cache-from=type=gha,scope=${{ matrix.variant }}
         env:
