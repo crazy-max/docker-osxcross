@@ -116,8 +116,8 @@ RUN apk add --update  --no-cache \
 FROM base-${BASE_VARIANT} AS build-osxcross
 ARG OSX_SDK
 WORKDIR /tmp/osxcross
-COPY --from=osxcross-src /osxcross .
-COPY --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
+COPY --link --from=osxcross-src /osxcross .
+COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
 RUN mkdir -p /out/osxsdk && touch /out/osxsdk/.dummy
 
@@ -125,7 +125,7 @@ FROM --platform=$BUILDPLATFORM busybox AS build-dummy
 RUN mkdir -p /out/osxcross /out/osxsdk && touch /out/osxcross/.dummy && touch /out/osxsdk/.dummy
 
 FROM build-dummy AS build-darwin
-COPY --from=sdk /osxsdk /out/osxsdk
+COPY --link --from=sdk /osxsdk /out/osxsdk
 RUN mkdir -p /out/osxcross && touch /out/osxcross/.dummy
 
 FROM build-dummy AS build-windows
@@ -157,7 +157,7 @@ FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS test-alpine
 RUN apk add --no-cache clang file lld musl-dev
 
 FROM test-${BASE_VARIANT} AS test-osxcross
-COPY --from=build /out/osxcross /osxcross
+COPY --link --from=build /out/osxcross /osxcross
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
 WORKDIR /src
@@ -200,4 +200,4 @@ file /tmp/testlibcxx
 EOT
 
 FROM scratch
-COPY --from=build /out /
+COPY --link --from=build /out /
