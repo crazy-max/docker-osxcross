@@ -35,7 +35,9 @@ ___
 
 ## Projects using osxcross
 
-* [goxx](https://github.com/crazy-max/goxx)
+* [crazy-max/goxx](https://github.com/crazy-max/goxx)
+* [docker/docker-credential-helpers](https://github.com/docker/docker-credential-helpers)
+* [jzelinskie/faq](https://github.com/jzelinskie/faq)
 
 ## Build
 
@@ -97,7 +99,7 @@ FROM ubuntu
 RUN apt-get update && apt-get install -y clang lld libc6-dev
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN --mount=from=osxcross,src=/osxcross,target=/osxcross \
+RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
       o64-clang ...
 ```
 
@@ -113,7 +115,7 @@ FROM alpine
 RUN apk add --no-cache clang lld musl-dev
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN --mount=from=osxcross,src=/osxcross,target=/osxcross \
+RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
       o64-clang ...
 ```
 
@@ -134,7 +136,7 @@ RUN apk add --no-cache clang lld musl-dev
 ARG TARGETPLATFORM
 RUN xx-apk add gcc g++ musl-dev
 RUN --mount=type=bind,target=. \
-    --mount=from=osxcross,src=/osxsdk,target=/xx-sdk \
+    --mount=type=bind,from=osxcross,source=/osxsdk,target=/xx-sdk \
       xx-clang ...
 ```
 
