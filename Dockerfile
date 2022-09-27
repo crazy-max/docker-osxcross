@@ -4,11 +4,25 @@ ARG BASE_VARIANT="ubuntu"
 ARG UBUNTU_VERSION="18.04"
 ARG DEBIAN_VERSION="bullseye"
 ARG ALPINE_VERSION="3.16"
+ARG XX_VERSION="1.1.2"
 
 ARG CMAKE_VERSION="3.20.1"
 ARG OSX_SDK="MacOSX11.3.sdk"
 ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
+
+FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
+RUN mkdir -p /out/osxcross/osxcross
+
+FROM --platform=$BUILDPLATFORM busybox AS build-dummy-sdk
+RUN mkdir -p /out/osxsdk/osxsdk
+
+FROM --platform=$BUILDPLATFORM busybox AS build-dummy-winsdk
+RUN mkdir -p /out/osxsdk /out/Files/osxsdk
+
+FROM scratch AS build-dummy
+COPY --link --from=build-dummy-cross / /
+COPY --link --from=build-dummy-sdk / /
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS sdk
 RUN apk --update --no-cache add ca-certificates curl tar xz
@@ -119,16 +133,16 @@ WORKDIR /tmp/osxcross
 COPY --link --from=osxcross-src /osxcross .
 COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
-RUN mkdir -p /out/osxsdk && touch /out/osxsdk/.dummy
+COPY --link --from=build-dummy-sdk / /
 
-FROM --platform=$BUILDPLATFORM busybox AS build-dummy
-RUN mkdir -p /out/osxcross /out/osxsdk && touch /out/osxcross/.dummy && touch /out/osxsdk/.dummy
-
-FROM build-dummy AS build-darwin
+FROM scratch AS build-darwin
+COPY --link --from=build-dummy-cross / /
 COPY --link --from=sdk /osxsdk /out/osxsdk
-RUN mkdir -p /out/osxcross && touch /out/osxcross/.dummy
 
-FROM build-dummy AS build-windows
+FROM scratch AS build-windows
+COPY --link --from=build-dummy-cross / /
+COPY --link --from=build-dummy-winsdk / /
+
 FROM build-dummy AS build-freebsd
 FROM build-dummy AS build-linux-386
 FROM build-osxcross AS build-linux-amd64
@@ -174,7 +188,7 @@ o64-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
 file /tmp/testlibcxx
 EOT
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.1.2 AS xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
 FROM test-alpine AS test-osxsdk
 WORKDIR /src
 COPY --from=xx / /
