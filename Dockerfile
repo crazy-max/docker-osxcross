@@ -6,10 +6,10 @@ ARG DEBIAN_VERSION="bullseye"
 ARG ALPINE_VERSION="3.16"
 ARG XX_VERSION="1.1.2"
 
-ARG CMAKE_VERSION="3.20.1"
-ARG OSX_SDK="MacOSX11.3.sdk"
-ARG OSX_SDK_URL="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="062922bbb81ac52787d8e53fa4af190acb552ec7"
+ARG CMAKE_VERSION="3.23.1"
+ARG OSX_SDK="MacOSX12.3.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/12.3/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="50e86ebca7d14372febd0af8cd098705049161b9"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
