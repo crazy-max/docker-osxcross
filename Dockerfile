@@ -21,8 +21,8 @@ FROM --platform=$BUILDPLATFORM busybox AS build-dummy-winsdk
 RUN mkdir -p /out/osxsdk /out/Files/osxsdk
 
 FROM scratch AS build-dummy
-COPY --link --from=build-dummy-cross / /
-COPY --link --from=build-dummy-sdk / /
+COPY --link --from=build-dummy-cross /out /
+COPY --link --from=build-dummy-sdk /out /
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS sdk
 RUN apk --update --no-cache add ca-certificates curl tar xz
@@ -133,15 +133,15 @@ WORKDIR /tmp/osxcross
 COPY --link --from=osxcross-src /osxcross .
 COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
-COPY --link --from=build-dummy-sdk / /
+COPY --link --from=build-dummy-sdk /out /
 
 FROM scratch AS build-darwin
-COPY --link --from=build-dummy-cross / /
+COPY --link --from=build-dummy-cross /out /
 COPY --link --from=sdk /osxsdk /out/osxsdk
 
 FROM scratch AS build-windows
-COPY --link --from=build-dummy-cross / /
-COPY --link --from=build-dummy-winsdk / /
+COPY --link --from=build-dummy-cross /out /
+COPY --link --from=build-dummy-winsdk /out /
 
 FROM build-dummy AS build-freebsd
 FROM build-dummy AS build-linux-386
