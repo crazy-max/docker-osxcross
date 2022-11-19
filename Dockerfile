@@ -133,7 +133,7 @@ WORKDIR /tmp/osxcross
 COPY --link --from=osxcross-src /osxcross .
 COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
 RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
-COPY --link --from=build-dummy-sdk / /
+RUN mkdir -p /out/osxsdk/osxsdk
 
 FROM scratch AS build-darwin
 COPY --link --from=build-dummy-cross / /
