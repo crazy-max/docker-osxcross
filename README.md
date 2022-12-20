@@ -1,5 +1,5 @@
 [![Latest version](https://img.shields.io/github/v/tag/crazy-max/docker-osxcross?label=version&style=flat-square)](https://hub.docker.com/r/crazymax/osxcross/tags?page=1&ordering=last_updated)
-[![Build Status](https://img.shields.io/github/workflow/status/crazy-max/docker-osxcross/build?label=build&logo=github&style=flat-square)](https://github.com/crazy-max/docker-osxcross/actions?query=workflow%3Abuild)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/crazy-max/docker-osxcross/build.yml?branch=main&label=build&logo=github&style=flat-square)](https://github.com/crazy-max/docker-osxcross/actions?query=workflow%3Abuild)
 [![Docker Stars](https://img.shields.io/docker/stars/crazymax/osxcross.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxcross/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/crazymax/osxcross.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/crazymax/osxcross/)
 
