@@ -82,7 +82,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build ${{ matrix.variant }}
-        uses: docker/bake-action@v2
+        uses: docker/bake-action@v3
         with:
           files: |
             ./docker-bake.hcl
