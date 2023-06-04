@@ -7,9 +7,9 @@ ARG ALPINE_VERSION="3.16"
 ARG XX_VERSION="1.1.2"
 
 ARG CMAKE_VERSION="3.23.1"
-ARG OSX_SDK="MacOSX12.3.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/12.3/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="50e86ebca7d14372febd0af8cd098705049161b9"
+ARG OSX_SDK="MacOSX13.1.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
@@ -176,16 +176,16 @@ ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
 WORKDIR /src
 RUN --mount=type=bind,source=./test <<EOT
-set -e
+  set -e
 
-o64-clang -v test.c -O3 -o /tmp/test
-file /tmp/test
+  o64-clang -v test.c -O3 -o /tmp/test
+  file /tmp/test
 
-o64-clang++ -v test.cpp -O3 -o /tmp/testcxx
-file /tmp/testcxx
+  o64-clang++ -v test.cpp -O3 -o /tmp/testcxx
+  file /tmp/testcxx
 
-o64-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
-file /tmp/testlibcxx
+  o64-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
+  file /tmp/testlibcxx
 EOT
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
@@ -197,20 +197,20 @@ ARG TARGETPLATFORM
 RUN xx-apk add gcc g++ musl-dev
 RUN --mount=type=bind,source=./test \
     --mount=from=sdk,src=/osxsdk,target=/xx-sdk <<EOT
-set -e
-echo "sysroot: $(xx-info sysroot)"
+  set -e
+  echo "sysroot: $(xx-info sysroot)"
 
-xx-clang -v test.c -O3 -o /tmp/test
-xx-verify /tmp/test
-file /tmp/test
+  xx-clang -v test.c -O3 -o /tmp/test
+  xx-verify /tmp/test
+  file /tmp/test
 
-xx-clang++ -v test.cpp -O3 -o /tmp/testcxx
-xx-verify /tmp/testcxx
-file /tmp/testcxx
+  xx-clang++ -v test.cpp -O3 -o /tmp/testcxx
+  xx-verify /tmp/testcxx
+  file /tmp/testcxx
 
-xx-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
-xx-verify /tmp/testlibcxx
-file /tmp/testlibcxx
+  xx-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
+  xx-verify /tmp/testlibcxx
+  file /tmp/testlibcxx
 EOT
 
 FROM scratch
