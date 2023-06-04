@@ -6,7 +6,7 @@ ARG DEBIAN_VERSION="bullseye"
 ARG ALPINE_VERSION="3.16"
 ARG XX_VERSION="1.1.2"
 
-ARG CMAKE_VERSION="3.23.1"
+ARG CMAKE_VERSION="3.23.5"
 ARG OSX_SDK="MacOSX13.1.sdk"
 ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
