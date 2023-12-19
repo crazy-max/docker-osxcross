@@ -7,9 +7,9 @@ ARG ALPINE_VERSION="3.16"
 ARG XX_VERSION="1.3.0"
 
 ARG CMAKE_VERSION="3.28.1"
-ARG OSX_SDK="MacOSX13.1.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
+ARG OSX_SDK="MacOSX14.0.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/14.0/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="ff8d100f3f026b4ffbe4ce96d8aac4ce06f1278b"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
