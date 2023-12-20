@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
 
 ARG BASE_VARIANT="ubuntu"
-ARG UBUNTU_VERSION="20.04"
-ARG DEBIAN_VERSION="bullseye"
-ARG ALPINE_VERSION="3.16"
-ARG XX_VERSION="1.2.1"
+ARG UBUNTU_VERSION="22.04"
+ARG DEBIAN_VERSION="bookworm"
+ARG ALPINE_VERSION="3.18"
+ARG XX_VERSION="1.3.0"
 
-ARG CMAKE_VERSION="3.23.5"
-ARG OSX_SDK="MacOSX13.1.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
+ARG CMAKE_VERSION="3.28.1"
+ARG OSX_SDK="MacOSX14.0.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/14.0/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="ff8d100f3f026b4ffbe4ce96d8aac4ce06f1278b"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
@@ -132,7 +132,7 @@ ARG OSX_SDK
 WORKDIR /tmp/osxcross
 COPY --link --from=osxcross-src /osxcross .
 COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
-RUN OSX_VERSION_MIN=10.10 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
+RUN OSX_VERSION_MIN=10.13 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
 RUN mkdir -p /out/osxsdk/osxsdk
 
 FROM scratch AS build-darwin
