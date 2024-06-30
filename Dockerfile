@@ -6,7 +6,6 @@ ARG DEBIAN_VERSION="bookworm"
 ARG ALPINE_VERSION="3.18"
 ARG XX_VERSION="1.4.0"
 
-ARG CMAKE_VERSION="3.23.5"
 ARG OSX_SDK="MacOSX13.1.sdk"
 ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
 ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
@@ -32,10 +31,10 @@ RUN curl -sSL "$OSX_SDK_URL" -o "/$OSX_SDK.tar.xz"
 RUN mkdir /osxsdk && tar -xf "/$OSX_SDK.tar.xz" -C "/osxsdk"
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS osxcross-src
-RUN apk --update --no-cache add git patch
+RUN apk --update --no-cache add patch
 WORKDIR /osxcross
 ARG OSX_CROSS_COMMIT
-RUN git clone https://github.com/tpoechtrager/osxcross.git . && git reset --hard $OSX_CROSS_COMMIT
+ADD "https://github.com/tpoechtrager/osxcross.git#${OSX_CROSS_COMMIT}" .
 COPY patches/lcxx.patch .
 RUN patch -p1 < lcxx.patch
 
@@ -48,6 +47,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     build-essential \
     ca-certificates \
     clang \
+    cmake \
     git \
     libbz2-dev \
     libmpc-dev \
@@ -61,17 +61,11 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     lzma-dev \
     make \
     patch \
-    python \
+    python3 \
     uuid-dev \
     wget \
     xz-utils \
-    zlib1g-dev \
-  && apt-get -y autoremove \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-ARG CMAKE_VERSION
-RUN mkdir -p /opt/cmake && cd /opt/cmake && wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-$(uname -m).tar.gz -O - | tar xvz --strip 1
-ENV PATH=/opt/cmake/bin:$PATH
+    zlib1g-dev
 
 FROM debian:${DEBIAN_VERSION} AS base-debian
 RUN export DEBIAN_FRONTEND="noninteractive" \
@@ -82,6 +76,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     build-essential \
     ca-certificates \
     clang \
+    cmake \
     git \
     libbz2-dev \
     libmpc-dev \
@@ -95,20 +90,14 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     lzma-dev \
     make \
     patch \
-    python \
+    python3 \
     uuid-dev \
     wget \
     xz-utils \
-    zlib1g-dev \
-  && apt-get -y autoremove \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-ARG CMAKE_VERSION
-RUN mkdir -p /opt/cmake && cd /opt/cmake && wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-$(uname -m).tar.gz -O - | tar xvz --strip 1
-ENV PATH=/opt/cmake/bin:$PATH
+    zlib1g-dev
 
 FROM alpine:${ALPINE_VERSION} AS base-alpine
-RUN apk add --update  --no-cache \
+RUN apk add --update --no-cache \
   bash \
   bsd-compat-headers \
   clang \
