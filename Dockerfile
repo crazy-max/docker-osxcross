@@ -6,9 +6,9 @@ ARG DEBIAN_VERSION="bookworm"
 ARG ALPINE_VERSION="3.18"
 ARG XX_VERSION="1.4.0"
 
-ARG OSX_SDK="MacOSX13.1.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/13.1/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="ed079949e7aee248ad7e7cb97726cd1c8556afd1"
+ARG OSX_SDK="MacOSX14.5.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/14.5/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="fd32ecc6e0786369272be2da670bc9b5849b215a"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
