@@ -83,8 +83,7 @@ Image: crazymax/osxcross:latest
 * `latest-debian`, `xx.x-debian`, `xx.x-rx-debian`
 * `latest-alpine`, `xx.x-alpine`, `xx.x-rx-alpine`
 
-> **Note:**
-> 
+> [!NOTE]
 > `xx.x` has to be replaced with one of the MaxOSX releases available (e.g. `11.3`).
 > `rx` has to be replaced with a release number (e.g. `r6`).
 
