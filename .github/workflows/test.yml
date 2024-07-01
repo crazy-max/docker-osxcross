@@ -31,17 +31,15 @@ jobs:
             variant: alpine
     steps:
       -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
         name: Test
         uses: docker/bake-action@v5
         with:
+          source: "{{defaultContext}}"
           targets: test-${{ matrix.type }}
           set: |
-            *.cache-from=type=gha,scope=${{ matrix.variant }}
+            *.cache-from=type=gha,scope=${{ matrix.variant }}-linux-amd64
         env:
           BASE_VARIANT: ${{ matrix.variant }}
