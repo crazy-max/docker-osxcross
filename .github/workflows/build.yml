@@ -36,6 +36,17 @@ jobs:
         id: platforms
         run: |
           echo "matrix=$(docker buildx bake image-all --print | jq -cr '.target."image-all".platforms')" >>${GITHUB_OUTPUT}
+
+  meta:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - ubuntu
+          - debian
+          - alpine
+    steps:
       -
         name: Docker meta
         id: meta
@@ -67,7 +78,7 @@ jobs:
         name: Upload meta bake definition
         uses: actions/upload-artifact@v4
         with:
-          name: bake-meta
+          name: bake-meta-${{ matrix.variant }}
           path: /tmp/bake-meta.json
           if-no-files-found: error
           retention-days: 1
@@ -76,6 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prepare
+      - meta
     strategy:
       fail-fast: false
       matrix:
@@ -94,7 +106,7 @@ jobs:
         name: Download meta bake definition
         uses: actions/download-artifact@v4
         with:
-          name: bake-meta
+          name: bake-meta-${{ matrix.variant }}
           path: /tmp
       -
         name: Set up QEMU
@@ -169,7 +181,7 @@ jobs:
         name: Download meta bake definition
         uses: actions/download-artifact@v4
         with:
-          name: bake-meta
+          name: bake-meta-${{ matrix.variant }}
           path: /tmp
       -
         name: Download digests
