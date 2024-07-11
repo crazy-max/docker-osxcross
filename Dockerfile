@@ -114,14 +114,18 @@ RUN apk add --update --no-cache \
   openssl-dev \
   patch \
   python3 \
-  xz
+  xz \
+  wget
 
 FROM base-${BASE_VARIANT} AS build-osxcross
 ARG OSX_SDK
 WORKDIR /tmp/osxcross
 COPY --link --from=osxcross-src /osxcross .
 COPY --link --from=sdk /$OSX_SDK.tar.xz ./tarballs/$OSX_SDK.tar.xz
-RUN OSX_VERSION_MIN=10.13 UNATTENDED=1 ENABLE_COMPILER_RT_INSTALL=1 TARGET_DIR=/out/osxcross ./build.sh
+RUN OSX_VERSION_MIN=10.13 UNATTENDED=1 ./build.sh
+RUN OSX_VERSION_MIN=10.13 ./build_gcc.sh
+RUN mkdir -p /out/osxcross
+RUN mv target/* /out/osxcross
 RUN mkdir -p /out/osxsdk/osxsdk
 
 FROM scratch AS build-darwin
