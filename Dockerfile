@@ -114,7 +114,8 @@ RUN apk add --update --no-cache \
   openssl-dev \
   patch \
   python3 \
-  xz
+  xz \
+  wget
 
 FROM base-${BASE_VARIANT} AS build-osxcross
 ARG OSX_SDK
