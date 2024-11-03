@@ -61,14 +61,13 @@ docker buildx bake image-all
 | [GitHub Container Registry](https://github.com/users/crazy-max/packages/container/package/osxcross)  | `ghcr.io/crazy-max/osxcross`    |
 
 ```
-$ docker run --rm mplatform/mquery crazymax/osxcross:latest
-Image: crazymax/osxcross:latest
- * Manifest List: Yes
- * Supported platforms:
-   - darwin/amd64
-   - darwin/arm64
-   - linux/amd64
-   - linux/arm64
+$ docker buildx imagetools inspect crazymax/osxcross --format "{{json .Manifest}}" | \
+  jq -r '.manifests[] | select(.platform.os != null and .platform.os != "unknown") | .platform | "\(.os)/\(.architecture)\(if .variant then "/" + .variant else "" end)"'
+
+darwin/amd64
+darwin/arm64
+linux/amd64
+linux/arm64
 ```
 
 ### Supported tags
