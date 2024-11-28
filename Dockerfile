@@ -6,9 +6,9 @@ ARG DEBIAN_VERSION="trixie"
 ARG ALPINE_VERSION="3.22"
 ARG XX_VERSION="1.6.1"
 
-ARG OSX_SDK="MacOSX14.5.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/14.5/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="fd32ecc6e0786369272be2da670bc9b5849b215a"
+ARG OSX_SDK="MacOSX15.5.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/15.5/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="3d6a91c14a65b170aa50ecc3fda19dd6414e23a9"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
