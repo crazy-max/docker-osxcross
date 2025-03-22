@@ -1,8 +1,12 @@
 name: build
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  contents: read
 
 on:
   schedule:
@@ -84,7 +88,12 @@ jobs:
           retention-days: 1
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    permissions:
+      # same as global permissions
+      contents: read
+      # required to push to GHCR
+      packages: write
     needs:
       - prepare
       - meta
@@ -167,6 +176,11 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    permissions:
+      # same as global permissions
+      contents: read
+      # required to push to GHCR
+      packages: write
     needs:
       - build
     strategy:
