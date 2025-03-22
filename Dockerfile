@@ -8,7 +8,7 @@ ARG XX_VERSION="1.5.0"
 
 ARG OSX_SDK="MacOSX15.1.sdk"
 ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/15.1/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="29fe6dd35522073c9df5800f8cd1feb4b9a993a8"
+ARG OSX_CROSS_COMMIT="611675b5179c4a9a5e33eac6c376ed8f986bab21"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
