@@ -2,7 +2,7 @@
 
 ARG BASE_VARIANT="ubuntu"
 ARG UBUNTU_VERSION="22.04"
-ARG DEBIAN_VERSION="bookworm"
+ARG DEBIAN_VERSION="trixie"
 ARG ALPINE_VERSION="3.22"
 ARG XX_VERSION="1.6.1"
 
@@ -83,11 +83,10 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     libmpfr-dev \
     libgmp-dev \
     liblzma-dev \
-    libpsi3-dev \
     libssl-dev \
     libxml2-dev \
     libz-dev \
-    lzma-dev \
+    llvm-dev \
     make \
     patch \
     python3 \
