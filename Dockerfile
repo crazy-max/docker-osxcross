@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG BASE_VARIANT="ubuntu"
-ARG UBUNTU_VERSION="22.04"
+ARG UBUNTU_VERSION="24.04"
 ARG DEBIAN_VERSION="trixie"
 ARG ALPINE_VERSION="3.22"
 ARG XX_VERSION="1.6.1"
@@ -58,6 +58,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" \
     libssl-dev \
     libxml2-dev \
     libz-dev \
+    llvm-dev \
     lzma-dev \
     make \
     patch \
