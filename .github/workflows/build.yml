@@ -27,76 +27,8 @@ env:
   GHCR_SLUG: ghcr.io/crazy-max/osxcross
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.platforms.outputs.matrix }}
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v5
-      -
-        name: Create matrix
-        id: platforms
-        run: |
-          echo "matrix=$(docker buildx bake image-all --print | jq -cr '.target."image-all".platforms')" >>${GITHUB_OUTPUT}
-
-  meta:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        variant:
-          - ubuntu
-          - debian
-          - alpine
-    steps:
-      -
-        name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.DOCKERHUB_SLUG }}
-            ${{ env.GHCR_SLUG }}
-          tags: |
-            type=match,pattern=(.*)-r,group=1,enable=${{ matrix.variant == 'ubuntu' }}
-            type=match,pattern=(.*)-r,group=1,suffix=-${{ matrix.variant }}
-            type=edge,enable=${{ matrix.variant == 'ubuntu' }}
-            type=edge,suffix=-${{ matrix.variant }}
-            type=ref,event=tag,enable=${{ matrix.variant == 'ubuntu' }}
-            type=ref,event=tag,suffix=-${{ matrix.variant }}
-            type=ref,event=pr
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') && matrix.variant == 'ubuntu' }}
-            type=raw,value=latest,suffix=-${{ matrix.variant }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
-          flavor: |
-            latest=false
-          labels: |
-            org.opencontainers.image.title=MacOSX cross toolchain (${{ matrix.variant }})
-            org.opencontainers.image.vendor=CrazyMax
-      -
-        name: Rename meta bake definition file
-        run: |
-          mv "${{ steps.meta.outputs.bake-file }}" "/tmp/bake-meta.json"
-      -
-        name: Upload meta bake definition
-        uses: actions/upload-artifact@v5
-        with:
-          name: bake-meta-${{ matrix.variant }}
-          path: /tmp/bake-meta.json
-          if-no-files-found: error
-          retention-days: 1
-
   build:
-    runs-on: ${{ startsWith(matrix.platform, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    permissions:
-      # same as global permissions
-      contents: read
-      # required to push to GHCR
-      packages: write
-    needs:
-      - prepare
-      - meta
+    uses: docker/github-builder/.github/workflows/bake.yml@v1
     strategy:
       fail-fast: false
       matrix:
@@ -104,132 +36,39 @@ jobs:
           - ubuntu
           - debian
           - alpine
-        platform: ${{ fromJson(needs.prepare.outputs.matrix) }}
-    steps:
-      -
-        name: Prepare
-        run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-      -
-        name: Download meta bake definition
-        uses: actions/download-artifact@v6
-        with:
-          name: bake-meta-${{ matrix.variant }}
-          path: /tmp
-      -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          buildkitd-flags: --debug
-      -
-        name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      -
-        name: Login to GHCR
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Build ${{ matrix.variant }}
-        id: bake
-        uses: docker/bake-action@v6
-        with:
-          files: |
-            ./docker-bake.hcl
-            cwd:///tmp/bake-meta.json
-          targets: image
-          set: |
-            *.tags=
-            *.platform=${{ matrix.platform }}
-            *.cache-from=type=gha,scope=${{ matrix.variant }}-${{ env.PLATFORM_PAIR }}
-            *.cache-to=type=gha,scope=${{ matrix.variant }}-${{ env.PLATFORM_PAIR }},mode=max
-            *.output=type=image,"name=${{ env.DOCKERHUB_SLUG }},${{ env.GHCR_SLUG }}",push-by-digest=true,name-canonical=true,push=${{ github.event_name != 'pull_request' }}
-        env:
-          BASE_VARIANT: ${{ matrix.variant }}
-      -
-        name: Export digest
-        run: |
-          mkdir -p /tmp/digests
-          digest="${{ fromJSON(steps.bake.outputs.metadata).image['containerimage.digest'] }}"
-          touch "/tmp/digests/${digest#sha256:}"
-      -
-        name: Upload digest
-        uses: actions/upload-artifact@v5
-        with:
-          name: digests-${{ matrix.variant }}-${{ env.PLATFORM_PAIR }}
-          path: /tmp/digests/*
-          if-no-files-found: error
-          retention-days: 1
-
-  merge:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     permissions:
-      # same as global permissions
-      contents: read
-      # required to push to GHCR
-      packages: write
-    needs:
-      - build
-    strategy:
-      fail-fast: false
-      matrix:
-        variant:
-          - ubuntu
-          - debian
-          - alpine
-    steps:
-      -
-        name: Download meta bake definition
-        uses: actions/download-artifact@v6
-        with:
-          name: bake-meta-${{ matrix.variant }}
-          path: /tmp
-      -
-        name: Download digests
-        uses: actions/download-artifact@v6
-        with:
-          path: /tmp/digests
-          pattern: digests-${{ matrix.variant }}-*
-          merge-multiple: true
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      -
-        name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+      contents: read # same as global permissions
+      id-token: write # for signing attestation(s) with GitHub OIDC Token
+      packages: write # required to push to GHCR
+    with:
+      setup-qemu: true
+      target: image-all
+      cache: true
+      cache-scope: image
+      output: image
+      push: ${{ github.event_name != 'pull_request' }}
+      set-meta-labels: true
+      meta-images: |
+        crazymax/osxcross
+        ghcr.io/crazy-max/osxcross
+      meta-tags: |
+        type=match,pattern=(.*)-r,group=1,enable=${{ matrix.variant == 'ubuntu' }}
+        type=match,pattern=(.*)-r,group=1,suffix=-${{ matrix.variant }}
+        type=edge,enable=${{ matrix.variant == 'ubuntu' }}
+        type=edge,suffix=-${{ matrix.variant }}
+        type=ref,event=tag,enable=${{ matrix.variant == 'ubuntu' }}
+        type=ref,event=tag,suffix=-${{ matrix.variant }}
+        type=ref,event=pr
+        type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') && matrix.variant == 'ubuntu' }}
+        type=raw,value=latest,suffix=-${{ matrix.variant }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+      meta-labels: |
+        org.opencontainers.image.title=MacOSX cross toolchain (${{ matrix.variant }})
+        org.opencontainers.image.vendor=CrazyMax
+    secrets:
+      registry-auths: |
+        - registry: docker.io
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      -
-        name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
+        - registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Create manifest list and push
-        working-directory: /tmp/digests
-        run: |
-          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("${{ env.DOCKERHUB_SLUG }}")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
-            $(printf '${{ env.DOCKERHUB_SLUG }}@sha256:%s ' *)
-          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("${{ env.GHCR_SLUG }}")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
-            $(printf '${{ env.GHCR_SLUG }}@sha256:%s ' *)
-      -
-        name: Inspect image
-        run: |
-          tag=$(jq -r '.target."docker-metadata-action".args.DOCKER_META_VERSION' /tmp/bake-meta.json)
-          docker buildx imagetools inspect ${{ env.DOCKERHUB_SLUG }}:${tag}
-          docker buildx imagetools inspect ${{ env.GHCR_SLUG }}:${tag}
