@@ -4,11 +4,11 @@ ARG BASE_VARIANT="ubuntu"
 ARG UBUNTU_VERSION="24.04"
 ARG DEBIAN_VERSION="trixie"
 ARG ALPINE_VERSION="3.22"
-ARG XX_VERSION="1.6.1"
+ARG XX_VERSION="1.9.0"
 
-ARG OSX_SDK="MacOSX15.5.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/15.5/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="3d6a91c14a65b170aa50ecc3fda19dd6414e23a9"
+ARG OSX_SDK="MacOSX26.1.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/26.1/${OSX_SDK}.tar.xz"
+ARG OSX_CROSS_COMMIT="e6ab3fa7423f9235ce9ed6381d6d3af191b46b59"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
