@@ -4,7 +4,7 @@ ARG BASE_VARIANT="ubuntu"
 ARG UBUNTU_VERSION="24.04"
 ARG DEBIAN_VERSION="trixie"
 ARG ALPINE_VERSION="3.22"
-ARG XX_VERSION="1.6.1"
+ARG XX_VERSION="1.9.0"
 
 ARG OSX_SDK="MacOSX26.1.sdk"
 ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/26.1/${OSX_SDK}.tar.xz"
