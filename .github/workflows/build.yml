@@ -4,23 +4,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
 permissions:
   contents: read
 
 on:
   schedule:
-    - cron: '0 8 */6 * *' # every 6 days to keep cache
+    - cron: '0 8 */6 * *'
   push:
     branches:
       - 'main'
     tags:
       - '*'
-    paths-ignore:
-      - '**.md'
   pull_request:
-    paths-ignore:
-      - '**.md'
 
 env:
   DOCKERHUB_SLUG: crazymax/osxcross
@@ -28,7 +23,7 @@ env:
 
 jobs:
   build:
-    uses: docker/github-builder/.github/workflows/bake.yml@v1
+    uses: docker/github-builder/.github/workflows/bake.yml@70313223e2665c3211b454b3fea6534624e78d64 # v1.4.0
     strategy:
       fail-fast: false
       matrix:
