@@ -1,14 +1,23 @@
 # syntax=docker/dockerfile:1
 
 ARG BASE_VARIANT="ubuntu"
-ARG UBUNTU_VERSION="24.04"
-ARG DEBIAN_VERSION="trixie"
-ARG ALPINE_VERSION="3.22"
-ARG XX_VERSION="1.9.0"
+# renovate: datasource=docker depName=ubuntu versioning=ubuntu
+ARG UBUNTU_VERSION=24.04
+# renovate: datasource=docker depName=debian versioning=debian
+ARG DEBIAN_VERSION=trixie
+# renovate: datasource=docker depName=alpine versioning=docker
+ARG ALPINE_VERSION=3.22
+# renovate: datasource=docker depName=tonistiigi/xx versioning=docker
+ARG XX_VERSION=1.9.0
 
-ARG OSX_SDK="MacOSX26.1.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/26.1/${OSX_SDK}.tar.xz"
-ARG OSX_CROSS_COMMIT="e6ab3fa7423f9235ce9ed6381d6d3af191b46b59"
+# renovate: datasource=custom.macos-sdk depName=joseluisq/macosx-sdks
+ARG OSX_SDK_VERSION=26.1
+ARG OSX_SDK_SHA256=beee7212d265a6d2867d0236cc069314b38d5fb3486a6515734e76fa210c784c
+ARG OSX_SDK="MacOSX${OSX_SDK_VERSION}.sdk"
+ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/${OSX_SDK_VERSION}/${OSX_SDK}.tar.xz"
+
+# renovate: datasource=git-refs depName=tpoechtrager/osxcross ref=master
+ARG OSX_CROSS_COMMIT=e6ab3fa7423f9235ce9ed6381d6d3af191b46b59
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
@@ -24,10 +33,11 @@ COPY --link --from=build-dummy-cross / /
 COPY --link --from=build-dummy-sdk / /
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS sdk
-RUN apk --update --no-cache add ca-certificates curl tar xz
+RUN apk --update --no-cache add tar xz
 ARG OSX_SDK
 ARG OSX_SDK_URL
-RUN curl -sSL "$OSX_SDK_URL" -o "/$OSX_SDK.tar.xz"
+ARG OSX_SDK_SHA256
+ADD --checksum=sha256:${OSX_SDK_SHA256} ${OSX_SDK_URL} /${OSX_SDK}.tar.xz
 RUN mkdir /osxsdk && tar -xf "/$OSX_SDK.tar.xz" -C "/osxsdk"
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS osxcross-src
