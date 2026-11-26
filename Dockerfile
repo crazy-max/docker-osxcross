@@ -8,7 +8,7 @@ ARG DEBIAN_VERSION=trixie
 # renovate: datasource=docker depName=alpine versioning=docker
 ARG ALPINE_VERSION=3.22
 # renovate: datasource=docker depName=tonistiigi/xx versioning=docker
-ARG XX_VERSION=1.9.0
+ARG XX_VERSION=1.10.0
 
 # renovate: datasource=custom.macos-sdk depName=joseluisq/macosx-sdks
 ARG OSX_SDK_VERSION=26.1
