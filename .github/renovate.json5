@@ -25,9 +25,9 @@
       "customType": "regex",
       "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>custom\\.macos-sdk) depName=(?<depName>\\S+)\\r?\\nARG OSX_SDK_VERSION=(?<currentValue>[\\d.]+)\\r?\\nARG OSX_SDK_SHA256=(?<currentDigest>[a-f0-9]{64})"
+        "# renovate: datasource=(?<datasource>github-releases) depName=(?<depName>\\S+)\\r?\\nARG PBZX_VERSION=(?<currentValue>\\S+)"
       ],
-      "versioningTemplate": "loose"
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",
@@ -39,31 +39,6 @@
       "versioningTemplate": "exact"
     }
   ],
-  "customDatasources": {
-    "macos-sdk": {
-      "defaultRegistryUrlTemplate": "https://api.github.com/repos/{{packageName}}/releases?per_page=100",
-      "transformTemplates": [
-        "{\
-          'releases': [$map(\
-            $[draft = false and prerelease = false and $match(tag_name, /^[0-9]+(\\.[0-9]+)*$/)],\
-            function($r) { (\
-              $asset := $r.assets[\
-                name = 'MacOSX' & $r.tag_name & '.sdk.tar.xz' and\
-                $match($string(digest), /^sha256:[a-f0-9]{64}$/)\
-              ];\
-              $exists($asset) ? {\
-                'version': $r.tag_name,\
-                'digest': $substringAfter($asset.digest, 'sha256:'),\
-                'releaseTimestamp': $r.published_at,\
-                'changelogUrl': $r.html_url\
-              }\
-            ) }\
-          )],\
-          'sourceUrl': 'https://github.com/joseluisq/macosx-sdks'\
-        }"
-      ]
-    }
-  },
   "packageRules": [
     {
       "matchManagers": ["dockerfile"],
@@ -79,6 +54,14 @@
       // Git refs do not provide a release timestamp.
       "matchDatasources": ["git-refs"],
       "minimumReleaseAge": null
+    },
+    {
+      // Pick up upstream master commits once a month to limit PR churn.
+      "matchDatasources": ["git-refs"],
+      "matchDepNames": ["tpoechtrager/osxcross"],
+      "matchCurrentValue": "master",
+      "extends": ["schedule:monthly"],
+      "updateNotScheduled": false
     },
     {
       "matchFileNames": ["Dockerfile"],

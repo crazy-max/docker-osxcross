@@ -9,15 +9,15 @@ ARG DEBIAN_VERSION=trixie
 ARG ALPINE_VERSION=3.24
 # renovate: datasource=docker depName=tonistiigi/xx versioning=docker
 ARG XX_VERSION=1.10.0
-
-# renovate: datasource=custom.macos-sdk depName=joseluisq/macosx-sdks
-ARG OSX_SDK_VERSION=26.1
-ARG OSX_SDK_SHA256=beee7212d265a6d2867d0236cc069314b38d5fb3486a6515734e76fa210c784c
-ARG OSX_SDK="MacOSX${OSX_SDK_VERSION}.sdk"
-ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/${OSX_SDK_VERSION}/${OSX_SDK}.tar.xz"
-
+# renovate: datasource=github-releases depName=NiklasRosenstein/pbzx
+ARG PBZX_VERSION=v1.1.0
 # renovate: datasource=git-refs depName=tpoechtrager/osxcross ref=master
-ARG OSX_CROSS_COMMIT=e6ab3fa7423f9235ce9ed6381d6d3af191b46b59
+ARG OSX_CROSS_COMMIT=8d457942c0237df988eb191c1c88546ad09e2696
+
+ARG OSX_SDK_VERSION=26.5
+ARG OSX_SDK_SHA256=5f044578cd78a3a9b9c965a42d56bad609ee5d252e1d4e6aa7c42fc3f35fee7b
+ARG OSX_SDK="MacOSX${OSX_SDK_VERSION}.sdk"
+ARG OSX_SDK_URL="https://swcdn.apple.com/content/downloads/09/08/047-91568-A_Y1CFZWQCD4/4xekpyz43i26dbp4enxfro8eb1q7wiujh5/CLTools_macOSNMOS_SDK.pkg"
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
@@ -32,77 +32,84 @@ FROM scratch AS build-dummy
 COPY --link --from=build-dummy-cross / /
 COPY --link --from=build-dummy-sdk / /
 
+FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS pbzx
+RUN apk add --no-cache build-base xar-dev xz-dev
+ARG PBZX_VERSION
+ADD "https://github.com/NiklasRosenstein/pbzx.git#${PBZX_VERSION}" /src
+RUN cc -O2 /src/pbzx.c -o /usr/local/bin/pbzx -llzma -lxar
+
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS sdk
-RUN apk --update --no-cache add tar xz
+RUN apk add --no-cache libarchive-tools libxar tar xz
+COPY --from=pbzx /usr/local/bin/pbzx /usr/local/bin/
 ARG OSX_SDK
 ARG OSX_SDK_URL
 ARG OSX_SDK_SHA256
-ADD --checksum=sha256:${OSX_SDK_SHA256} ${OSX_SDK_URL} /${OSX_SDK}.tar.xz
-RUN mkdir /osxsdk && tar -xf "/$OSX_SDK.tar.xz" -C "/osxsdk"
+ADD --checksum=sha256:${OSX_SDK_SHA256} ${OSX_SDK_URL} /tmp/sdk.pkg
+RUN <<EOT
+  set -eo pipefail
+  mkdir /osxsdk
+  cd /tmp
+  bsdtar -xOf sdk.pkg Payload | pbzx -n - | bsdtar -xf - "./Library/Developer/CommandLineTools/SDKs/$OSX_SDK"
+  mv "Library/Developer/CommandLineTools/SDKs/$OSX_SDK" /osxsdk/
+  XZ_OPT=-1 tar -cJf "/$OSX_SDK.tar.xz" -C /osxsdk "$OSX_SDK"
+EOT
 
-FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS osxcross-src
-RUN apk --update --no-cache add patch
+FROM scratch AS osxcross-src
 WORKDIR /osxcross
 ARG OSX_CROSS_COMMIT
 ADD "https://github.com/tpoechtrager/osxcross.git#${OSX_CROSS_COMMIT}" .
-COPY patches/lcxx.patch .
-RUN patch -p1 < lcxx.patch
 
 FROM ubuntu:${UBUNTU_VERSION} AS base-ubuntu
-RUN export DEBIAN_FRONTEND="noninteractive" \
-  && apt-get update \
-  && apt-get install --no-install-recommends -y \
-    bash \
-    binutils-multiarch-dev \
-    build-essential \
-    ca-certificates \
-    clang \
-    cmake \
-    git \
-    libbz2-dev \
-    libmpc-dev \
-    libmpfr-dev \
-    libgmp-dev \
-    liblzma-dev \
-    libssl-dev \
-    libxml2-dev \
-    libz-dev \
-    llvm-dev \
-    make \
-    patch \
-    python3 \
-    uuid-dev \
-    wget \
-    xz-utils \
-    zlib1g-dev
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  bash \
+  binutils-multiarch-dev \
+  build-essential \
+  ca-certificates \
+  clang \
+  cmake \
+  git \
+  libbz2-dev \
+  libmpc-dev \
+  libmpfr-dev \
+  libgmp-dev \
+  liblzma-dev \
+  libssl-dev \
+  libxml2-dev \
+  libz-dev \
+  llvm-dev \
+  make \
+  patch \
+  python3 \
+  uuid-dev \
+  wget \
+  xz-utils \
+  zlib1g-dev
 
 FROM debian:${DEBIAN_VERSION} AS base-debian
-RUN export DEBIAN_FRONTEND="noninteractive" \
-  && apt-get update \
-  && apt-get install --no-install-recommends -y \
-    bash \
-    binutils-multiarch-dev \
-    build-essential \
-    ca-certificates \
-    clang \
-    cmake \
-    git \
-    libbz2-dev \
-    libmpc-dev \
-    libmpfr-dev \
-    libgmp-dev \
-    liblzma-dev \
-    libssl-dev \
-    libxml2-dev \
-    libz-dev \
-    llvm-dev \
-    make \
-    patch \
-    python3 \
-    uuid-dev \
-    wget \
-    xz-utils \
-    zlib1g-dev
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  bash \
+  binutils-multiarch-dev \
+  build-essential \
+  ca-certificates \
+  clang \
+  cmake \
+  git \
+  libbz2-dev \
+  libmpc-dev \
+  libmpfr-dev \
+  libgmp-dev \
+  liblzma-dev \
+  libssl-dev \
+  libxml2-dev \
+  libz-dev \
+  llvm-dev \
+  make \
+  patch \
+  python3 \
+  uuid-dev \
+  wget \
+  xz-utils \
+  zlib1g-dev
 
 FROM alpine:${ALPINE_VERSION} AS base-alpine
 RUN apk add --update --no-cache \
@@ -159,10 +166,10 @@ FROM build-linux-${TARGETARCH}${TARGETVARIANT} AS build-linux
 FROM build-${TARGETOS} AS build
 
 FROM --platform=$BUILDPLATFORM ubuntu:${UBUNTU_VERSION} AS test-ubuntu
-RUN export DEBIAN_FRONTEND="noninteractive" && apt-get update && apt-get install -y clang file lld libc6-dev
+RUN apt-get update && apt-get install -y clang file lld libc6-dev
 
 FROM --platform=$BUILDPLATFORM debian:${DEBIAN_VERSION} AS test-debian
-RUN export DEBIAN_FRONTEND="noninteractive" && apt-get update && apt-get install -y clang file lld libc6-dev
+RUN apt-get update && apt-get install -y clang file lld libc6-dev
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS test-alpine
 RUN apk add --no-cache clang file lld musl-dev
