@@ -2,7 +2,7 @@
 
 ARG BASE_VARIANT="ubuntu"
 # renovate: datasource=docker depName=ubuntu versioning=ubuntu
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=26.04
 # renovate: datasource=docker depName=debian versioning=debian
 ARG DEBIAN_VERSION=trixie
 # renovate: datasource=docker depName=alpine versioning=docker
