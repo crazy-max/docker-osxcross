@@ -17,7 +17,7 @@ ARG OSX_SDK="MacOSX${OSX_SDK_VERSION}.sdk"
 ARG OSX_SDK_URL="https://github.com/joseluisq/macosx-sdks/releases/download/${OSX_SDK_VERSION}/${OSX_SDK}.tar.xz"
 
 # renovate: datasource=git-refs depName=tpoechtrager/osxcross ref=master
-ARG OSX_CROSS_COMMIT=e6ab3fa7423f9235ce9ed6381d6d3af191b46b59
+ARG OSX_CROSS_COMMIT=8d457942c0237df988eb191c1c88546ad09e2696
 
 FROM --platform=$BUILDPLATFORM busybox AS build-dummy-cross
 RUN mkdir -p /out/osxcross/osxcross
