@@ -6,7 +6,7 @@ ARG UBUNTU_VERSION=26.04
 # renovate: datasource=docker depName=debian versioning=debian
 ARG DEBIAN_VERSION=trixie
 # renovate: datasource=docker depName=alpine versioning=docker
-ARG ALPINE_VERSION=3.22
+ARG ALPINE_VERSION=3.24
 # renovate: datasource=docker depName=tonistiigi/xx versioning=docker
 ARG XX_VERSION=1.10.0
 
