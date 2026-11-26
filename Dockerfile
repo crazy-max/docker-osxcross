@@ -183,7 +183,10 @@ RUN --mount=type=bind,source=./test <<EOT
   set -e
 
   o64-clang -v test.c -O3 -o /tmp/test
-  file /tmp/test
+  file -b /tmp/test | grep -F 'Mach-O 64-bit x86_64 executable'
+
+  oa64-clang -v test.c -O3 -o /tmp/test-arm64
+  file -b /tmp/test-arm64 | grep -F 'Mach-O 64-bit arm64 executable'
 
   o64-clang++ -v test.cpp -O3 -o /tmp/testcxx
   file /tmp/testcxx
@@ -215,6 +218,11 @@ RUN --mount=type=bind,source=./test \
   xx-clang++ -v test_libcxx.cpp -O3 -o /tmp/testlibcxx
   xx-verify /tmp/testlibcxx
   file /tmp/testlibcxx
+
+  if [ "${TARGETPLATFORM%%/*}" = darwin ]; then
+    xx-clang test_corefoundation.c -framework CoreFoundation -o /tmp/test-corefoundation
+    xx-verify /tmp/test-corefoundation
+  fi
 EOT
 
 FROM scratch
