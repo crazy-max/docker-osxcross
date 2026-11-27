@@ -23,7 +23,7 @@ env:
 
 jobs:
   build:
-    uses: docker/github-builder/.github/workflows/bake.yml@c4a1b216d96a8c85b45a9974b37857828274c808 # v1.13.0
+    uses: docker/github-builder/.github/workflows/bake.yml@bb1eb9fb69408ac52395fb21f49c6b52d564529a # v1.20.0
     strategy:
       fail-fast: false
       matrix:
